@@ -5,7 +5,7 @@ from fastapi.params import Body
 from pydantic import BaseModel
 from random import randint
 
-from starlette.status import HTTP_201_CREATED
+from starlette.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 app = FastAPI()
 
@@ -18,6 +18,11 @@ class Post(BaseModel):
 my_posts = [{"title":"title1", "content": "beach", "id": 1}, 
 {"title":"Europe", "content": "europe is fun!", "id":2}]
 
+def find_index_of_post(id):
+    for index, post in enumerate(my_posts):
+        if post['id'] == id:
+            return index
+
 def find_post(id):
     for post in my_posts:
         print (post['id'])
@@ -29,7 +34,7 @@ def find_post(id):
 def root():
     return {"message": "Welcome to my API!"}
 
-# best practice: endpoints should be plural 
+# best practice: endpoints should be plural
 @app.get("/posts")
 def get_posts():
     return {"data": my_posts}
@@ -50,3 +55,13 @@ def create_posts(post: Post):
 
     my_posts.append(post_dict)
     return {"content":post_dict}
+
+@app.delete("/posts/{id}", status_code=HTTP_204_NO_CONTENT )
+def delete_post(id:int):
+    index = find_index_of_post(id)
+    if not index:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} does not exist.")
+    
+    my_posts.pop(index) 
+        
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
