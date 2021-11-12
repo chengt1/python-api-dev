@@ -25,8 +25,13 @@ def get_posts():
     return {"data": my_posts}
 
 @app.get("/posts/{id}")
-def get_post():
-    return
+def get_post(id):
+    print(id)
+    for post in my_posts:
+        print (post['id'])
+        if post['id'] == int(id):
+            return post
+    return {"message": "no posts found"}
 
 @app.post("/posts")
 def create_posts(post: Post):
