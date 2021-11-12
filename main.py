@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status
 from fastapi.params import Body
 from pydantic import BaseModel
 from random import randint
@@ -15,6 +15,13 @@ class Post(BaseModel):
 my_posts = [{"title":"title1", "content": "beach", "id": 1}, 
 {"title":"Europe", "content": "europe is fun!", "id":2}]
 
+def find_post(id):
+    for post in my_posts:
+        print (post['id'])
+        if post['id'] == int(id):
+            return post
+    return None
+
 @app.get("/")
 def root():
     return {"message": "Welcome to my API!"}
@@ -25,13 +32,13 @@ def get_posts():
     return {"data": my_posts}
 
 @app.get("/posts/{id}")
-def get_post(id):
+def get_post(id: int, response: Response):
     print(id)
-    for post in my_posts:
-        print (post['id'])
-        if post['id'] == int(id):
-            return post
-    return {"message": "no posts found"}
+    post_found = find_post(id)
+    if not post_found:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"message": f"post with id: {id} was not found."}
+    return {"post_detail": post_found} 
 
 @app.post("/posts")
 def create_posts(post: Post):
