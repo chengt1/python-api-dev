@@ -5,6 +5,8 @@ from fastapi.params import Body
 from pydantic import BaseModel
 from random import randint
 
+from starlette.status import HTTP_201_CREATED
+
 app = FastAPI()
 
 class Post(BaseModel):
@@ -40,7 +42,7 @@ def get_post(id: int, response: Response):
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"post with id: {id} was not found.")
     return {"post_detail": post_found} 
 
-@app.post("/posts")
+@app.post("/posts", status_code=HTTP_201_CREATED)
 def create_posts(post: Post):
     post_dict = post.dict()
     new_id = abs(hash(post_dict['title']+post_dict['content']+str(randint(1,1000))))
